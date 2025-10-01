@@ -31,7 +31,7 @@ if st.button("Calcular longitud"):
             "Diámetro externo (cm)": d_ext,
             "Diámetro interno (cm)": d_int,
             "Espesor (mm)": espesor,
-            "Longitud (cm)": round(longitud, 2)
+            "Longitud (cm)": round(longitud, 0)
         })
 
     else:
