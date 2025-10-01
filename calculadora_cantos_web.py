@@ -2,7 +2,7 @@ import streamlit as st
 import math
 
 # Título de la aplicación
-st.title("Calculadora de Longitud de Canto")
+st.title("Calculadora de Longitud de Canto LAMIRED")
 
 # Instrucciones
 st.write("Ingresa los valores para calcular la longitud aproximada del canto usando el perímetro medio.")
