@@ -37,18 +37,7 @@ if st.button("Calcular longitud"):
         longitud_m = area_cm2 / (espesor * 10.0)
 
         st.success(f"👉 La longitud aproximada del canto es: **{longitud_m:.2f} metros**")
-        # ---- Detalle del cálculo (auditoría) ----
-        espesor_cm = espesor / 10.0
-        longitud_cm = area_cm2 / espesor_cm
-        perimetro_medio_cm = math.pi * (d_ext + d_int) / 2.0
-
-        with st.expander("📚 Ver detalle del cálculo"):
-            st.write(f"Área del anillo: **{area_cm2:,.2f} cm²**")
-            st.write(f"Espesor: **{espesor:.2f} mm**  → **{espesor_cm:.3f} cm**")
-            st.write(f"Perímetro medio (referencia): **{perimetro_medio_cm:,.2f} cm**")
-            st.write(f"Longitud en cm (sin redondeo): **{longitud_cm:,.2f} cm**")
-            st.write(f"Longitud en m (sin redondeo): **{longitud_m:,.2f} m**")
-            st.write(f"Longitud en m (aplicando redondeo): **{longitud_m_red:,.2f} m**")
+       
 
         # Guardar en historial
         st.session_state.historial.append({
@@ -69,3 +58,8 @@ if st.session_state.historial:
         "historial_cantos.csv",
         "text/csv"
     )
+    
+# Botón para limpiar historial
+if st.button("🧹 Limpiar historial"):
+    st.session_state.historial.clear()
+    st.success("Historial limpiado.")
