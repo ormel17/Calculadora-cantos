@@ -114,8 +114,4 @@ if st.button("🧹 Limpiar historial"):
 
 
 
-            plt.close(fig)  # libera memoria
-        else:
-            st.info("La imagen aparecerá cuando d_ext > d_int y ambos sean > 0.")
-    else:
-        st.info("Para ver el diagrama instala **matplotlib** (ver instrucciones en requirements.txt).")
+
