@@ -17,6 +17,6 @@ if st.button("Calcular longitud"):
     if d_ext > 0 and d_int >= 0 and espesor > 0:
         perimetro_medio = math.pi * (d_ext + d_int) / 2
         longitud = (((d_ext/2) * (d_ext/2))-((d_int/2) * (d_int/2)))/espesor
-        st.success(f"La longitud aproximada del canto es: {longitud:.2f} mm")
+        st.success(f"La longitud aproximada del canto es: {longitud:.2f} cm")
     else:
         st.error("Por favor ingresa valores válidos mayores que cero para todos los campos.")
