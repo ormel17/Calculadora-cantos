@@ -29,7 +29,7 @@ if "historial" not in st.session_state:
 
 
        # Guardar en historial
-        st.session_state.historial.append({
+ st.session_state.historial.append({
             "Diámetro externo (cm)": d_ext,
             "Diámetro interno (cm)": d_int,
             "Espesor (mm)": espesor,
