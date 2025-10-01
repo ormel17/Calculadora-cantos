@@ -12,7 +12,7 @@ st.write("Busca el ítem por **código** o **color** y calcula la **longitud** (
 BASE_DIR = Path(__file__).resolve().parent
 CATALOGO_PATH = BASE_DIR / "Data-cantos.xlsx"      # archivo en el repo
 COL_ITEM  = "Item ERP"
-COL_DESC  = "Descripcion LAMIRED"
+COL_DESC  = "Descripción LAMIRED"
 COL_COLOR = "Apariencia"
 REQ_COLS  = [COL_ITEM, COL_DESC, COL_COLOR]
 
