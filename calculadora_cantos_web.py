@@ -1,10 +1,21 @@
 import streamlit as st
 import math
 import pandas as pd
-
 import matplotlib.pyplot as plt
+import io
 
-def render_diagrama(d_ext_cm: float, d_int_cm: float):
+# ------------------------ Página ------------------------
+st.set_page_config(page_title="Calculadora de Canto LAMIRED", layout="centered")
+st.title("🧮 Calculadora de Longitud de Canto - LAMIRED")
+st.write("Ingresa los valores para calcular la longitud aproximada del canto (usando el área del anillo).")
+
+# ------------------------ Función del diagrama ------------------------
+def render_diagrama(d_ext_cm: float, d_int_cm: float, espesor_mm: float | None = None):
+    """
+    Dibuja dos círculos concéntricos d_ext y d_int.
+    Si se pasa espesor_mm, lo anota como referencia (no a escala).
+    Retorna una figura de matplotlib o None si los datos no son válidos.
+    """
     if d_ext_cm <= 0 or d_int_cm < 0 or d_ext_cm <= d_int_cm:
         return None
 
@@ -16,33 +27,37 @@ def render_diagrama(d_ext_cm: float, d_int_cm: float):
     # Círculo externo e interno
     ext = plt.Circle((0, 0), R_ext, fill=False, linewidth=2)
     inte = plt.Circle((0, 0), R_int, fill=False, linewidth=2, linestyle="--")
-    ax.add_patch(ext); ax.add_patch(inte)
+    ax.add_patch(ext)
+    ax.add_patch(inte)
 
-    # Diámetros con flechas
-    ax.annotate("", xy=(R_ext, 0), xytext=(-R_ext, 0),
-                arrowprops=dict(arrowstyle="<->", linewidth=1.5))
-    ax.text(0, 0.3 * R_ext, f"d_ext = {d_ext_cm:.2f} cm", ha="center", va="bottom")
+    # Diámetro externo
+    ax.annotate(
+        "", xy=(R_ext, 0), xytext=(-R_ext, 0),
+        arrowprops=dict(arrowstyle="<->", linewidth=1.5)
+    )
+    ax.text(0, 0.30 * R_ext, f"d_ext = {d_ext_cm:.2f} cm", ha="center", va="bottom")
 
-    ax.annotate("", xy=(R_int, 0), xytext=(-R_int, 0),
-                arrowprops=dict(arrowstyle="<->", linewidth=1.5, linestyle="--"))
-    ax.text(0, -0.3 * R_ext, f"d_int = {d_int_cm:.2f} cm", ha="center", va="top")
+    # Diámetro interno
+    ax.annotate(
+        "", xy=(R_int, 0), xytext=(-R_int, 0),
+        arrowprops=dict(arrowstyle="<->", linewidth=1.5, linestyle="--")
+    )
+    ax.text(0, -0.30 * R_ext, f"d_int = {d_int_cm:.2f} cm", ha="center", va="top")
 
+    # Anotar espesor si viene
+    if espesor_mm is not None and espesor_mm > 0:
+        ax.text(0, -0.60 * R_ext, f"Espesor = {espesor_mm:.2f} mm (referencia)", ha="center")
+
+    # Estética
     ax.set_aspect("equal", adjustable="box")
     ax.set_xlim(-R_ext * 1.2, R_ext * 1.2)
     ax.set_ylim(-R_ext * 1.2, R_ext * 1.2)
-    ax.set_xlabel("Esquema: dos círculos concéntricos (anillo del rollo)")
+    ax.set_xlabel("Esquema: anillo del rollo (línea sólida = d_ext, línea punteada = d_int)")
     ax.set_xticks([]); ax.set_yticks([])
     fig.tight_layout()
     return fig
 
-
-
-st.set_page_config(page_title="Calculadora de Canto LAMIRED", layout="centered")
-st.title("🧮 Calculadora de Longitud de Canto - LAMIRED")
-
-st.write("Ingresa los valores para calcular la longitud aproximada del canto (usando el diametro de la circunferencia).")
-
-# Inputs organizados
+# ------------------------ Inputs ------------------------
 col1, col2, col3 = st.columns(3)
 with col1:
     d_ext = st.number_input("Diámetro externo (cm):", min_value=0.0, format="%.2f")
@@ -51,14 +66,11 @@ with col2:
 with col3:
     espesor = st.number_input("Espesor (mm):", min_value=0.0, format="%.2f")
 
-# Inicializar historial
+# ------------------------ Estado: historial ------------------------
 if "historial" not in st.session_state:
     st.session_state.historial = []
 
-
-
-
-# Botón de cálculo
+# ------------------------ Cálculo ------------------------
 if st.button("Calcular longitud"):
     # Validaciones
     if d_ext <= 0 or d_int < 0 or espesor <= 0:
@@ -71,8 +83,7 @@ if st.button("Calcular longitud"):
         # Resultado en METROS: cm² / (mm*0.1) = cm, luego /100 = m  ⇒ dividir entre (espesor*10)
         longitud_m = area_cm2 / (espesor * 10.0)
 
-        st.success(f"👉 La longitud aproximada del canto es: **{longitud_m:.2f} metros**")
-       
+        st.success(f"👉 La longitud aproximada del canto es: **{longitud_m:,.2f} m**")
 
         # Guardar en historial
         st.session_state.historial.append({
@@ -82,35 +93,43 @@ if st.button("Calcular longitud"):
             "Longitud (m)": round(longitud_m, 2)
         })
 
-# Mostrar historial
+        # (Opcional) Detalle de cálculo
+        espesor_cm = espesor / 10.0
+        longitud_cm = area_cm2 / espesor_cm
+        perimetro_medio_cm = math.pi * (d_ext + d_int) / 2.0
+        with st.expander("📚 Ver detalle del cálculo"):
+            st.write(f"Área del anillo: **{area_cm2:,.2f} cm²**")
+            st.write(f"Espesor: **{espesor:.2f} mm**  → **{espesor_cm:.3f} cm**")
+            st.write(f"Perímetro medio (referencia): **{perimetro_medio_cm:,.2f} cm**")
+            st.write(f"Longitud en cm (sin redondeo): **{longitud_cm:,.2f} cm**")
+            st.write(f"Longitud en m (sin redondeo): **{longitud_m:,.2f} m**")
+
+# ------------------------ Historial ------------------------
 if st.session_state.historial:
     st.subheader("📊 Historial de cálculos")
     df = pd.DataFrame(st.session_state.historial)
     st.table(df)
     st.download_button(
         "📥 Descargar historial en CSV",
-        df.to_csv(index=False),
+        df.to_csv(index=False).encode("utf-8"),
         "historial_cantos.csv",
         "text/csv"
     )
-    
+
 # Botón para limpiar historial
 if st.button("🧹 Limpiar historial"):
     st.session_state.historial.clear()
     st.success("Historial limpiado.")
 
-
-
-# ---- Imagen explicativa (toggle) ----
+# ------------------------ Imagen explicativa ------------------------
+st.markdown("---")
 mostrar_img = st.checkbox("Mostrar imagen explicativa", value=True)
-
 if mostrar_img:
-    fig = render_diagrama(d_ext, d_int)
+    fig = render_diagrama(d_ext, d_int, espesor)
     if fig is not None:
         st.subheader("🖼️ Imagen explicativa")
         st.pyplot(fig)
-        # (Opcional) botón para descargar la imagen
-        import io
+        # Descarga PNG
         buf = io.BytesIO()
         fig.savefig(buf, format="png", dpi=200, bbox_inches="tight")
         st.download_button(
@@ -119,8 +138,6 @@ if mostrar_img:
             file_name="diagrama_canto.png",
             mime="image/png"
         )
-        # liberar memoria gráfica
-        import matplotlib.pyplot as plt
-        plt.close(fig)
+        plt.close(fig)  # libera memoria
     else:
         st.info("La imagen aparecerá cuando d_ext > d_int y ambos sean > 0.")
