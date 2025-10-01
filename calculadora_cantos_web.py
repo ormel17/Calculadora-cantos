@@ -28,5 +28,20 @@ if st.button("Calcular longitud"):
         longitud = (math.pi * (((d_ext/2)**2) - ((d_int/2)**2))) / (espesor*10)  # conversión mm->cm
         st.success(f"👉 La longitud aproximada del canto es: **{longitud:.2f} metros**")
 
-        # Guardar en historial
+       # Guardar en historial
         st.session_state.historial.append({
+            "Diámetro externo (cm)": d_ext,
+            "Diámetro interno (cm)": d_int,
+            "Espesor (mm)": espesor,
+            "Longitud (cm)": round(longitud, 2)
+        })
+
+    else:
+        st.error("Verifica que todos los valores sean válidos y que el diámetro externo sea mayor al interno.")
+
+# Mostrar historial
+if st.session_state.historial:
+    st.subheader("📊 Historial de cálculos")
+    df = pd.DataFrame(st.session_state.historial)
+    st.table(df)
+    st.download_button("📥 Descargar historial en CSV", df.to_csv(index=False), "historial_cantos.csv", "text/csv")
