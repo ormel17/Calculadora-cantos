@@ -2,19 +2,6 @@ import streamlit as st
 import math
 import pandas as pd
 
-# Intentar importar matplotlib; si no está, no rompemos la app
-try:
-    import matplotlib.pyplot as plt
-    import io
-    MATPLOTLIB_OK = True
-except Exception:
-    MATPLOTLIB_OK = False
-    plt = None
-    io = None
-
-st.set_page_config(page_title="Calculadora de Canto LAMIRED", layout="centered")
-st.title("🧮 Calculadora de Longitud de Canto - LAMIRED")
-st.write("Ingresa los valores para calcular la longitud aproximada del canto (usando el área del anillo).")
 
 # ------------------------ Función del diagrama ------------------------
 def render_diagrama(d_ext_cm: float, d_int_cm: float, espesor_mm: float | None = None):
@@ -87,7 +74,7 @@ if st.button("Calcular longitud"):
         # Resultado en METROS: cm² / (mm*0.1) = cm, luego /100 = m  ⇒ dividir entre (espesor*10)
         longitud_m = area_cm2 / (espesor * 10.0)
 
-        st.success(f"👉 La longitud aproximada del canto es: **{longitud_m:,.2f} m**")
+        st.success(f"👉 La longitud aproximada del canto es: **{longitud_m:,.2f} metros**")
 
         # Guardar en historial
         st.session_state.historial.append({
@@ -125,24 +112,8 @@ if st.button("🧹 Limpiar historial"):
     st.session_state.historial.clear()
     st.success("Historial limpiado.")
 
-# ------------------------ Imagen explicativa ------------------------
-st.markdown("---")
-mostrar_img = st.checkbox("Mostrar imagen explicativa", value=True)
-if mostrar_img:
-    if MATPLOTLIB_OK:
-        fig = render_diagrama(d_ext, d_int, espesor)
-        if fig is not None:
-            st.subheader("🖼️ Imagen explicativa")
-            st.pyplot(fig)
-            # Descarga PNG
-            buf = io.BytesIO()
-            fig.savefig(buf, format="png", dpi=200, bbox_inches="tight")
-            st.download_button(
-                "📥 Descargar imagen (.png)",
-                data=buf.getvalue(),
-                file_name="diagrama_canto.png",
-                mime="image/png"
-            )
+
+
             plt.close(fig)  # libera memoria
         else:
             st.info("La imagen aparecerá cuando d_ext > d_int y ambos sean > 0.")
