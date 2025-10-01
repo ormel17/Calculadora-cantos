@@ -5,7 +5,7 @@ import pandas as pd
 st.set_page_config(page_title="Calculadora de Canto LAMIRED", layout="centered")
 st.title("🧮 Calculadora de Longitud de Canto - LAMIRED")
 
-st.write("Ingresa los valores para calcular la longitud aproximada del canto usando el perímetro medio.")
+st.write("Ingresa los valores para calcular la longitud aproximada del canto (usando el área del anillo).")
 
 # Inputs organizados
 col1, col2, col3 = st.columns(3)
@@ -20,28 +20,37 @@ with col3:
 if "historial" not in st.session_state:
     st.session_state.historial = []
 
-# Cálculo (resultado en METROS)
-    if st.button("Calcular longitud"): 
-        if d_ext > 0 and d_int >= 0 and espesor > 0 and d_ext > d_int:
-            longitud = math.pi * (((d_ext/2)**2) - ((d_int/2)**2)) / (espesor*10)
-    # conversión mm->cm 
-    st.success(f"👉 La longitud aproximada del canto es: **{longitud:.2f} metros**")
-
-
-       # Guardar en historial
- st.session_state.historial.append({
-            "Diámetro externo (cm)": d_ext,
-            "Diámetro interno (cm)": d_int,
-            "Espesor (mm)": espesor,
-            "Longitud (cm)": round(longitud, 2)
-        })
-
+# Botón de cálculo
+if st.button("Calcular longitud"):
+    # Validaciones
+    if d_ext <= 0 or d_int < 0 or espesor <= 0:
+        st.error("Todos los valores deben ser > 0 (y el diámetro interno puede ser 0).")
+    elif d_ext <= d_int:
+        st.error("El diámetro externo debe ser mayor que el diámetro interno.")
     else:
-        st.error("Verifica que todos los valores sean válidos y que el diámetro externo sea mayor al interno.")
+        # Área del anillo en cm²
+        area_cm2 = math.pi * (((d_ext / 2.0) ** 2) - ((d_int / 2.0) ** 2))
+        # Resultado en METROS: cm² / (mm*0.1) = cm, luego /100 = m  ⇒ dividir entre (espesor*10)
+        longitud_m = area_cm2 / (espesor * 10.0)
+
+        st.success(f"👉 La longitud aproximada del canto es: **{longitud_m:.2f} metros**")
+
+        # Guardar en historial
+        st.session_state.historial.append({
+            "Diámetro externo (cm)": round(d_ext, 2),
+            "Diámetro interno (cm)": round(d_int, 2),
+            "Espesor (mm)": round(espesor, 2),
+            "Longitud (m)": round(longitud_m, 2)
+        })
 
 # Mostrar historial
 if st.session_state.historial:
     st.subheader("📊 Historial de cálculos")
     df = pd.DataFrame(st.session_state.historial)
     st.table(df)
-    st.download_button("📥 Descargar historial en CSV", df.to_csv(index=False), "historial_cantos.csv", "text/csv")
+    st.download_button(
+        "📥 Descargar historial en CSV",
+        df.to_csv(index=False),
+        "historial_cantos.csv",
+        "text/csv"
+    )
