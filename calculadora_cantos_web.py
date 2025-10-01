@@ -20,6 +20,35 @@ with col3:
 if "historial" not in st.session_state:
     st.session_state.historial = []
 
+# ---- Opciones de salida (sidebar): redondeo operativo ----
+with st.sidebar:
+    st.header("⚙️ Opciones de salida")
+    redondeo = st.selectbox(
+        "Redondear longitud a",
+        ["Sin redondeo", "0.1 m", "0.5 m", "1 m"],
+        index=0
+    )
+    modo_redondeo = st.selectbox(
+        "Modo de redondeo",
+        ["Normal (≈)", "Hacia abajo (floor)", "Hacia arriba (ceil)"],
+        index=0
+    )
+
+# Helper para redondeo
+import math as _math
+def _round_to_step(valor: float, paso: float, modo: str) -> float:
+    if paso <= 0:
+        return valor
+    q = valor / paso
+    if modo == "Hacia abajo (floor)":
+        return _math.floor(q) * paso
+    elif modo == "Hacia arriba (ceil)":
+        return _math.ceil(q) * paso
+    else:  # Normal (≈)
+        return round(q) * paso
+
+
+
 # Botón de cálculo
 if st.button("Calcular longitud"):
     # Validaciones
