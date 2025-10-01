@@ -8,6 +8,67 @@ st.set_page_config(page_title="Calculadora de Longitud de Canto - LAMiRED", layo
 st.title("🧮 Calculadora de Longitud de Canto - LAMIRED")
 st.write("Busca el ítem por **código** o **color** y calcula la **longitud** (usando el área del anillo).")
 
+
+# ---------------- Entradas y cálculo ----------------
+col1, col2, col3 = st.columns(3)
+with col1:
+    d_ext = st.number_input("Diámetro externo (cm):", min_value=0.0, format="%.2f")
+with col2:
+    d_int = st.number_input("Diámetro interno (cm):", min_value=0.0, format="%.2f")
+with col3:
+    espesor = st.number_input("Espesor (mm):", min_value=0.0, format="%.2f")
+
+# Estado historial
+if "historial" not in st.session_state:
+    st.session_state.historial = []
+
+# Calcular
+if st.button("Calcular longitud"):
+    if d_ext <= 0 or d_int < 0 or espesor <= 0:
+        st.error("Todos los valores deben ser > 0 (y el diámetro interno puede ser 0).")
+    elif d_ext <= d_int:
+        st.error("El diámetro externo debe ser mayor que el diámetro interno.")
+    else:
+        area_cm2 = math.pi * (((d_ext / 2.0) ** 2) - ((d_int / 2.0) ** 2))
+        longitud_m = area_cm2 / (espesor * 10.0)  # m (cm² / (mm*10))
+
+        st.success(f"👉 Longitud aproximada: **{longitud_m:.2f} m**")
+
+        item = desc = color = ""
+        if sel_idx is not None:
+            item  = df_view.at[sel_idx, COL_ITEM]
+            desc  = df_view.at[sel_idx, COL_DESC]
+            color = df_view.at[sel_idx, COL_COLOR]
+
+        st.session_state.historial.append({
+            "Ítem": item,
+            "Nombre del producto": desc,
+            "Color": color,
+            "d_ext (cm)": round(d_ext, 2),
+            "d_int (cm)": round(d_int, 2),
+            "Espesor (mm)": round(espesor, 2),
+            "Longitud (m)": round(longitud_m, 2),
+        })
+
+# Limpiar historial
+if st.button("🧹 Limpiar historial"):
+    st.session_state.historial.clear()
+    st.success("Historial limpiado.")
+
+# Mostrar historial
+if st.session_state.historial:
+    st.subheader("📊 Historial de cálculos")
+    df_hist = pd.DataFrame(st.session_state.historial)
+    st.table(df_hist)
+    st.download_button(
+        "📥 Descargar historial (CSV)",
+        df_hist.to_csv(index=False).encode("utf-8"),
+        "historial_cantos.csv",
+        "text/csv"
+    )
+
+
+
 # ---------------- Rutas y columnas ----------------
 BASE_DIR = Path(__file__).resolve().parent
 CATALOGO_PATH = BASE_DIR / "Data-cantos.xlsx"      # archivo en el repo
@@ -67,73 +128,5 @@ df_view = df_catalog.loc[mask].copy()
 st.write("**Resultados del catálogo**")
 st.dataframe(df_view, use_container_width=True)
 
-# Selectbox robusto usando índices reales (evita errores con duplicados)
-if not df_view.empty:
-    sel_idx = st.selectbox(
-        "Selecciona el ítem a asociar (opcional)",
-        options=df_view.index.tolist(),
-        format_func=lambda i: f"{df_view.at[i, COL_ITEM]} — {df_view.at[i, COL_DESC]} — {df_view.at[i, COL_COLOR]}"
-    )
-else:
-    sel_idx = None
 
-st.markdown("---")
-
-# ---------------- Entradas y cálculo ----------------
-col1, col2, col3 = st.columns(3)
-with col1:
-    d_ext = st.number_input("Diámetro externo (cm):", min_value=0.0, format="%.2f")
-with col2:
-    d_int = st.number_input("Diámetro interno (cm):", min_value=0.0, format="%.2f")
-with col3:
-    espesor = st.number_input("Espesor (mm):", min_value=0.0, format="%.2f")
-
-# Estado historial
-if "historial" not in st.session_state:
-    st.session_state.historial = []
-
-# Calcular
-if st.button("Calcular longitud"):
-    if d_ext <= 0 or d_int < 0 or espesor <= 0:
-        st.error("Todos los valores deben ser > 0 (y el diámetro interno puede ser 0).")
-    elif d_ext <= d_int:
-        st.error("El diámetro externo debe ser mayor que el diámetro interno.")
-    else:
-        area_cm2 = math.pi * (((d_ext / 2.0) ** 2) - ((d_int / 2.0) ** 2))
-        longitud_m = area_cm2 / (espesor * 10.0)  # m (cm² / (mm*10))
-
-        st.success(f"👉 Longitud aproximada: **{longitud_m:.2f} m**")
-
-        item = desc = color = ""
-        if sel_idx is not None:
-            item  = df_view.at[sel_idx, COL_ITEM]
-            desc  = df_view.at[sel_idx, COL_DESC]
-            color = df_view.at[sel_idx, COL_COLOR]
-
-        st.session_state.historial.append({
-            "Ítem": item,
-            "Nombre del producto": desc,
-            "Color": color,
-            "d_ext (cm)": round(d_ext, 2),
-            "d_int (cm)": round(d_int, 2),
-            "Espesor (mm)": round(espesor, 2),
-            "Longitud (m)": round(longitud_m, 2),
-        })
-
-# Limpiar historial
-if st.button("🧹 Limpiar historial"):
-    st.session_state.historial.clear()
-    st.success("Historial limpiado.")
-
-# Mostrar historial
-if st.session_state.historial:
-    st.subheader("📊 Historial de cálculos")
-    df_hist = pd.DataFrame(st.session_state.historial)
-    st.table(df_hist)
-    st.download_button(
-        "📥 Descargar historial (CSV)",
-        df_hist.to_csv(index=False).encode("utf-8"),
-        "historial_cantos.csv",
-        "text/csv"
-    )
 
