@@ -15,7 +15,7 @@ espesor = st.number_input("Espesor del canto (mm):", min_value=0.0, format="%.2f
 # Botón para calcular
 if st.button("Calcular longitud"):
     if d_ext > 0 and d_int >= 0 and espesor > 0:
-        perimetro_medio = math.pi * (d_ext + d_int) / 20
+        perimetro_medio = math.pi * (d_ext + d_int) / 2
         longitud = perimetro_medio * espesor
         st.success(f"La longitud aproximada del canto es: {longitud:.2f} mm")
     else:
