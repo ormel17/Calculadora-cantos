@@ -20,11 +20,21 @@ with col3:
 if "historial" not in st.session_state:
     st.session_state.historial = []
 
-# Cálculo
+# Cálculo (resultado en METROS)
 if st.button("Calcular longitud"):
-    if d_ext > 0 and d_int >= 0 and espesor > 0 and d_ext > d_int:
-        longitud = math.pi * (((d_ext/2)**2) - ((d_int/2)**2)) / (espesor*10)  # conversión mm->cm
-        st.success(f"👉 La longitud aproximada del canto es: **{longitud:.2f} metros**")
+    # Validaciones mínimas
+    if d_ext <= 0 or d_int < 0 or espesor <= 0:
+        st.error("Todos los valores deben ser > 0 (y d_int ≥ 0).")
+    elif d_ext <= d_int:
+        st.error("El diámetro externo debe ser mayor que el interno.")
+    else:
+        # Área del anillo en cm²
+        area_cm2 = math.pi * (((d_ext/2.0)**2) - ((d_int/2.0)**2))
+        # Resultado directo en metros: dividir por (espesor*10)
+        longitud_m = area_cm2 / (espesor * 10.0)
+
+        st.success(f"👉 Longitud aproximada del canto: **{longitud_m:,.2f} metros**")
+
 
        # Guardar en historial
         st.session_state.historial.append({
