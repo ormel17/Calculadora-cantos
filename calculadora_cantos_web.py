@@ -20,32 +20,6 @@ with col3:
 if "historial" not in st.session_state:
     st.session_state.historial = []
 
-# ---- Opciones de salida (sidebar): redondeo operativo ----
-with st.sidebar:
-    st.header("⚙️ Opciones de salida")
-    redondeo = st.selectbox(
-        "Redondear longitud a",
-        ["Sin redondeo", "0.1 m", "0.5 m", "1 m"],
-        index=0
-    )
-    modo_redondeo = st.selectbox(
-        "Modo de redondeo",
-        ["Normal (≈)", "Hacia abajo (floor)", "Hacia arriba (ceil)"],
-        index=0
-    )
-
-# Helper para redondeo
-import math as _math
-def _round_to_step(valor: float, paso: float, modo: str) -> float:
-    if paso <= 0:
-        return valor
-    q = valor / paso
-    if modo == "Hacia abajo (floor)":
-        return _math.floor(q) * paso
-    elif modo == "Hacia arriba (ceil)":
-        return _math.ceil(q) * paso
-    else:  # Normal (≈)
-        return round(q) * paso
 
 
 
@@ -63,6 +37,18 @@ if st.button("Calcular longitud"):
         longitud_m = area_cm2 / (espesor * 10.0)
 
         st.success(f"👉 La longitud aproximada del canto es: **{longitud_m:.2f} metros**")
+        # ---- Detalle del cálculo (auditoría) ----
+        espesor_cm = espesor / 10.0
+        longitud_cm = area_cm2 / espesor_cm
+        perimetro_medio_cm = math.pi * (d_ext + d_int) / 2.0
+
+        with st.expander("📚 Ver detalle del cálculo"):
+            st.write(f"Área del anillo: **{area_cm2:,.2f} cm²**")
+            st.write(f"Espesor: **{espesor:.2f} mm**  → **{espesor_cm:.3f} cm**")
+            st.write(f"Perímetro medio (referencia): **{perimetro_medio_cm:,.2f} cm**")
+            st.write(f"Longitud en cm (sin redondeo): **{longitud_cm:,.2f} cm**")
+            st.write(f"Longitud en m (sin redondeo): **{longitud_m:,.2f} m**")
+            st.write(f"Longitud en m (aplicando redondeo): **{longitud_m_red:,.2f} m**")
 
         # Guardar en historial
         st.session_state.historial.append({
