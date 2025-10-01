@@ -98,3 +98,29 @@ if st.session_state.historial:
 if st.button("🧹 Limpiar historial"):
     st.session_state.historial.clear()
     st.success("Historial limpiado.")
+
+
+
+# ---- Imagen explicativa (toggle) ----
+mostrar_img = st.checkbox("Mostrar imagen explicativa", value=True)
+
+if mostrar_img:
+    fig = render_diagrama(d_ext, d_int)
+    if fig is not None:
+        st.subheader("🖼️ Imagen explicativa")
+        st.pyplot(fig)
+        # (Opcional) botón para descargar la imagen
+        import io
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=200, bbox_inches="tight")
+        st.download_button(
+            "📥 Descargar imagen (.png)",
+            data=buf.getvalue(),
+            file_name="diagrama_canto.png",
+            mime="image/png"
+        )
+        # liberar memoria gráfica
+        import matplotlib.pyplot as plt
+        plt.close(fig)
+    else:
+        st.info("La imagen aparecerá cuando d_ext > d_int y ambos sean > 0.")
