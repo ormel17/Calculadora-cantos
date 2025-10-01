@@ -5,7 +5,7 @@ import pandas as pd
 st.set_page_config(page_title="Calculadora de Canto LAMIRED", layout="centered")
 st.title("🧮 Calculadora de Longitud de Canto - LAMIRED")
 
-st.write("Ingresa los valores para calcular la longitud aproximada del canto (usando el área del anillo).")
+st.write("Ingresa los valores para calcular la longitud aproximada del canto (usando el diametro de la circunferencia).")
 
 # Inputs organizados
 col1, col2, col3 = st.columns(3)
