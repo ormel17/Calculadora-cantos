@@ -2,6 +2,41 @@ import streamlit as st
 import math
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
+def render_diagrama(d_ext_cm: float, d_int_cm: float):
+    if d_ext_cm <= 0 or d_int_cm < 0 or d_ext_cm <= d_int_cm:
+        return None
+
+    R_ext = d_ext_cm / 2.0
+    R_int = d_int_cm / 2.0
+
+    fig, ax = plt.subplots(figsize=(5, 5))
+
+    # Círculo externo e interno
+    ext = plt.Circle((0, 0), R_ext, fill=False, linewidth=2)
+    inte = plt.Circle((0, 0), R_int, fill=False, linewidth=2, linestyle="--")
+    ax.add_patch(ext); ax.add_patch(inte)
+
+    # Diámetros con flechas
+    ax.annotate("", xy=(R_ext, 0), xytext=(-R_ext, 0),
+                arrowprops=dict(arrowstyle="<->", linewidth=1.5))
+    ax.text(0, 0.3 * R_ext, f"d_ext = {d_ext_cm:.2f} cm", ha="center", va="bottom")
+
+    ax.annotate("", xy=(R_int, 0), xytext=(-R_int, 0),
+                arrowprops=dict(arrowstyle="<->", linewidth=1.5, linestyle="--"))
+    ax.text(0, -0.3 * R_ext, f"d_int = {d_int_cm:.2f} cm", ha="center", va="top")
+
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_xlim(-R_ext * 1.2, R_ext * 1.2)
+    ax.set_ylim(-R_ext * 1.2, R_ext * 1.2)
+    ax.set_xlabel("Esquema: dos círculos concéntricos (anillo del rollo)")
+    ax.set_xticks([]); ax.set_yticks([])
+    fig.tight_layout()
+    return fig
+
+
+
 st.set_page_config(page_title="Calculadora de Canto LAMIRED", layout="centered")
 st.title("🧮 Calculadora de Longitud de Canto - LAMIRED")
 
