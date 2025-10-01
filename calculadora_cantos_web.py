@@ -1,10 +1,17 @@
 import streamlit as st
 import math
 import pandas as pd
-import matplotlib.pyplot as plt
-import io
 
-# ------------------------ Página ------------------------
+# Intentar importar matplotlib; si no está, no rompemos la app
+try:
+    import matplotlib.pyplot as plt
+    import io
+    MATPLOTLIB_OK = True
+except Exception:
+    MATPLOTLIB_OK = False
+    plt = None
+    io = None
+
 st.set_page_config(page_title="Calculadora de Canto LAMIRED", layout="centered")
 st.title("🧮 Calculadora de Longitud de Canto - LAMIRED")
 st.write("Ingresa los valores para calcular la longitud aproximada del canto (usando el área del anillo).")
@@ -13,9 +20,10 @@ st.write("Ingresa los valores para calcular la longitud aproximada del canto (us
 def render_diagrama(d_ext_cm: float, d_int_cm: float, espesor_mm: float | None = None):
     """
     Dibuja dos círculos concéntricos d_ext y d_int.
-    Si se pasa espesor_mm, lo anota como referencia (no a escala).
-    Retorna una figura de matplotlib o None si los datos no son válidos.
+    Si no hay matplotlib disponible o los datos no son válidos, retorna None.
     """
+    if not MATPLOTLIB_OK:
+        return None
     if d_ext_cm <= 0 or d_int_cm < 0 or d_ext_cm <= d_int_cm:
         return None
 
@@ -31,17 +39,13 @@ def render_diagrama(d_ext_cm: float, d_int_cm: float, espesor_mm: float | None =
     ax.add_patch(inte)
 
     # Diámetro externo
-    ax.annotate(
-        "", xy=(R_ext, 0), xytext=(-R_ext, 0),
-        arrowprops=dict(arrowstyle="<->", linewidth=1.5)
-    )
+    ax.annotate("", xy=(R_ext, 0), xytext=(-R_ext, 0),
+                arrowprops=dict(arrowstyle="<->", linewidth=1.5))
     ax.text(0, 0.30 * R_ext, f"d_ext = {d_ext_cm:.2f} cm", ha="center", va="bottom")
 
     # Diámetro interno
-    ax.annotate(
-        "", xy=(R_int, 0), xytext=(-R_int, 0),
-        arrowprops=dict(arrowstyle="<->", linewidth=1.5, linestyle="--")
-    )
+    ax.annotate("", xy=(R_int, 0), xytext=(-R_int, 0),
+                arrowprops=dict(arrowstyle="<->", linewidth=1.5, linestyle="--"))
     ax.text(0, -0.30 * R_ext, f"d_int = {d_int_cm:.2f} cm", ha="center", va="top")
 
     # Anotar espesor si viene
@@ -52,7 +56,7 @@ def render_diagrama(d_ext_cm: float, d_int_cm: float, espesor_mm: float | None =
     ax.set_aspect("equal", adjustable="box")
     ax.set_xlim(-R_ext * 1.2, R_ext * 1.2)
     ax.set_ylim(-R_ext * 1.2, R_ext * 1.2)
-    ax.set_xlabel("Esquema: anillo del rollo (línea sólida = d_ext, línea punteada = d_int)")
+    ax.set_xlabel("Esquema: anillo del rollo (sólido = d_ext, punteado = d_int)")
     ax.set_xticks([]); ax.set_yticks([])
     fig.tight_layout()
     return fig
@@ -125,19 +129,22 @@ if st.button("🧹 Limpiar historial"):
 st.markdown("---")
 mostrar_img = st.checkbox("Mostrar imagen explicativa", value=True)
 if mostrar_img:
-    fig = render_diagrama(d_ext, d_int, espesor)
-    if fig is not None:
-        st.subheader("🖼️ Imagen explicativa")
-        st.pyplot(fig)
-        # Descarga PNG
-        buf = io.BytesIO()
-        fig.savefig(buf, format="png", dpi=200, bbox_inches="tight")
-        st.download_button(
-            "📥 Descargar imagen (.png)",
-            data=buf.getvalue(),
-            file_name="diagrama_canto.png",
-            mime="image/png"
-        )
-        plt.close(fig)  # libera memoria
+    if MATPLOTLIB_OK:
+        fig = render_diagrama(d_ext, d_int, espesor)
+        if fig is not None:
+            st.subheader("🖼️ Imagen explicativa")
+            st.pyplot(fig)
+            # Descarga PNG
+            buf = io.BytesIO()
+            fig.savefig(buf, format="png", dpi=200, bbox_inches="tight")
+            st.download_button(
+                "📥 Descargar imagen (.png)",
+                data=buf.getvalue(),
+                file_name="diagrama_canto.png",
+                mime="image/png"
+            )
+            plt.close(fig)  # libera memoria
+        else:
+            st.info("La imagen aparecerá cuando d_ext > d_int y ambos sean > 0.")
     else:
-        st.info("La imagen aparecerá cuando d_ext > d_int y ambos sean > 0.")
+        st.info("Para ver el diagrama instala **matplotlib** (ver instrucciones en requirements.txt).")
