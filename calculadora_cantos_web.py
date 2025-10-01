@@ -23,9 +23,7 @@ if "historial" not in st.session_state:
 # Cálculo
 if st.button("Calcular longitud"):
     if d_ext > 0 and d_int >= 0 and espesor > 0 and d_ext > d_int:
-        longitud = (math.pi * (((d_ext/2)**2) - ((d_int/2)**2))) / (espesor)  # conversión mm->cm
-        st.success(f"👉 La longitud aproximada del canto es: **{longitud:.2f} cm**")
-        longitud = (math.pi * (((d_ext/2)**2) - ((d_int/2)**2))) / (espesor*10)  # conversión mm->cm
+                longitud = (math.pi * (((d_ext/2)**2) - ((d_int/2)**2))) / (espesor*10)  # conversión mm->cm
         st.success(f"👉 La longitud aproximada del canto es: **{longitud:.2f} metros**")
 
        # Guardar en historial
