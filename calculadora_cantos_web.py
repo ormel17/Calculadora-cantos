@@ -3,6 +3,7 @@ import pandas as pd
 import math
 from pathlib import Path
 
+
 # ---------------- Config de página ----------------
 st.set_page_config(page_title="Calculadora de Longitud de Canto - LAMIRED", layout="centered")
 st.title("🧮 Calculadora de Longitud de Canto - LAMIRED")
